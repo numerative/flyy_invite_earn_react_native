@@ -33,8 +33,8 @@ const MyStack = () => {
 export default MyStack;
 
 const SDKSetupScreen = ({ navigation }) => {
-  const [packageName, onChangePackageName] = React.useState('com.example.flyyxintegration');
-  const [partnerId, onChangePartnerId] = React.useState('35299df860c15c0449c8');
+  const [packageName, onChangePackageName] = React.useState(null);
+  const [partnerId, onChangePartnerId] = React.useState(null);
 
   const onNextPressed = {
     initialize() {
