@@ -3,10 +3,46 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect } from 'react';
 import { TouchableOpacity, Platform, StyleSheet, Text, View, StatusBar, Button, ScrollView, TextInput } from 'react-native';
 import Flyy from 'react-native-flyy';
+import messaging from '@react-native-firebase/messaging';
 
 const Stack = createNativeStackNavigator();
 
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  if (
+    remoteMessage != null &&
+    remoteMessage.data != null &&
+    remoteMessage.data.notification_source != null &&
+    remoteMessage.data.notification_source === 'flyy_sdk'
+  ) {
+    Flyy.handleNotification(JSON.stringify(remoteMessage.data));
+  }
+});
+
+async function requestUserPermission() {
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+  if (enabled) {
+    console.log('Authorization status:', authStatus);
+  }
+}
+
 const MyStack = () => {
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      if (
+        remoteMessage != null &&
+        remoteMessage.data != null &&
+        remoteMessage.data.notification_source != null &&
+        remoteMessage.data.notification_source === 'flyy_sdk'
+      ) {
+        Flyy.handleNotification(JSON.stringify(remoteMessage.data));
+      }
+    });
+    return unsubscribe;
+  }, []);
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -72,7 +108,7 @@ const SDKSetupScreen = ({ navigation }) => {
           style={styles.caption}>from Settings > SDK Keys</Text>
         <View
           style={{ height: 10 }} />
-         <TouchableOpacity
+        <TouchableOpacity
           style={styles.button}
           onPress={() => {
             onNextPressed.initialize();
@@ -173,7 +209,7 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.buttonText}>Update KYC</Text>
         </TouchableOpacity>
         <View
-          style={{height:24}}/>
+          style={{ height: 24 }} />
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
